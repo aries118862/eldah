@@ -89,6 +89,7 @@
       margin-bottom: 20px;
       color: #2099da;
       text-align: center;
+      font-family: arial;
     }
     body.light h1 { color: #0077b6; }
 
@@ -96,10 +97,11 @@
       margin-bottom: 20px;
       padding: 10px;
       font-weight: bold;
-      color: #2099da;
+      color: #ff6600;
       border: 1px dashed #2099da;
       border-radius: 6px;
       text-align: center;
+      font-family: sans-serif;
     }
 
     label {
@@ -107,16 +109,31 @@
       margin-bottom: 6px;
       font-size: 14px;
       font-weight: bold;
+      font-family: sans-serif;
     }
 
-    select, input[type="text"] {
-      width: 100%;
+    select{
+       width: 100%;
       padding: 12px;
       margin-bottom: 18px;
       border: none;
       border-radius: 6px;
       font-size: 14px;
-      border-bottom: 2px solid #2099da;
+      border-left: 6px solid #2099da;
+      background: #3a3a3a;
+      color: #fff;
+      transition: all 0.3s ease;
+
+    }
+
+    input[type="text"] {
+      width: 93%;
+      padding: 12px;
+      margin-bottom: 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      border-left: 6px solid #2099da;
       background: #3a3a3a;
       color: #fff;
       transition: all 0.3s ease;
@@ -160,12 +177,13 @@
     .code-box {
       font-size: 22px;
       font-weight: bold;
-      color: #00ffcc;
+      color: #ff6600;
       text-align: center;
       padding: 10px;
       border-radius: 8px;
-      border: 1px solid #00ffcc;
+      border: 1px solid black;
     }
+  
   </style>
 </head>
 <body>
@@ -256,7 +274,7 @@ Ready to generate unlock code...</div>
     }
 
     function showError(error) {
-      logEl.innerHTML += "❌ Error: " + error + "\n";
+      logEl.innerHTML += " Error: " + error + "\n";
       logEl.scrollTop = logEl.scrollHeight;
     }
 
@@ -302,7 +320,7 @@ Ready to generate unlock code...</div>
         await logMessage("Verifying IMEI format... OK", 600);
         await logMessage("Connecting to server... OK", 800);
         await logMessage("Validating IMEI with manufacturer... OK", 1000);
-        await logMessage("Generating unlock code...", 700);
+        await logMessage("Generating unlock code...done", 700);
 
         const unlockCode = generateCode(imei);
         if (!unlockCode) throw new Error("Failed to generate unlock code.");
