@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELDAH NETWORK UNLOCK - Loading</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #1c1c1c;
+      color: #f1f1f1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      flex-direction: column;
+      transition: all 0.3s ease;
+    }
+    body.light { background: #f4f4f4; color: #111; }
+    
+    .logo {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 20px;
+      background: url('https://via.placeholder.com/120') no-repeat center/cover;
+      border-radius: 50%;
+      border: 3px solid #2099da;
+    }
+    body.light .logo { border-color: #0077b6; }
+
+    h1 {
+      margin-bottom: 30px;
+      color: #2099da;
+      font-size: 28px;
+      text-align: center;
+    }
+    body.light h1 { color: #0077b6; }
+
+    .progress-container {
+      width: 300px;
+      height: 20px;
+      background: #3a3a3a;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      border: 2px solid #2099da;
+    }
+    body.light .progress-container { background: #eaeaea; border-color: #0077b6; }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #2099da;
+      border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+    body.light .progress-bar { background: #0077b6; }
+
+    #progressText {
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .switch-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-top: 30px;
+    }
+    .switch-label { font-size: 16px; font-weight: bold; }
+    body.light .switch-label { color: #111; }
+    .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #777;
+      transition: 0.4s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background-color: white; transition: 0.4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #2196F3; }
+    input:checked + .slider:before { transform: translateX(26px); }
+  </style>
+</head>
+<body>
+  <img src="lock.png" class="logo"></div>
+  <h1>ELDAH NETWORK UNLOCK</h1>
+
+  <div class="progress-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div id="progressText">Loading 0%</div>
+
+  <div class="switch-container">
+    <span class="switch-label">Light Mode</span>
+    <label class="switch">
+      <input type="checkbox" id="modeSwitch">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <script>
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const modeSwitch = document.getElementById('modeSwitch');
+
+    modeSwitch.addEventListener('change', () => {
+      document.body.classList.toggle('light', modeSwitch.checked);
+    });
+
+    // Simulate loading progress
+    let progress = 0;
+    const interval = setInterval(() => {
+      if (progress >= 100) {
+        clearInterval(interval);
+        progressText.textContent = "Loading complete!";
+        // Redirect to the main app page automatically
+        window.location.href = 'main.html';
+      } else {
+        progress += 2; // increment progress
+        progressBar.style.width = progress + '%';
+        progressText.textContent = `Loading ${progress}%`;
+      }
+    }, 100);
+  </script>
+</body>
+</html>

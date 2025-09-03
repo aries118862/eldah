@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELDAH NETWORK UNLOCK - Auth</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #1c1c1c;
+      color: #f1f1f1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      transition: all 0.3s ease;
+    }
+    body.light { background: #f4f4f4; color: #111; }
+    .auth-wrapper { width: 380px; text-align: center; }
+    .auth-container {
+      background: #2a2a2a;
+      padding: 30px;
+      border-radius: 12px;
+      border: 2px solid rgba(32, 153, 218, 0.6);
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    body.light .auth-container { background: #fff; border-color: #2099da; }
+    h1 { font-size: 24px; margin-bottom: 25px; color: #2099da; }
+    body.light h1 { color: #0077b6; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
+    input { width: 100%; padding: 12px; margin-bottom: 20px; border: none; border-radius: 6px;
+      font-size: 14px; border-bottom: 2px solid #2099da; background: #3a3a3a; color: #fff; transition: all 0.3s ease; }
+    body.light input { background: #eaeaea; color: #111; }
+    button { width: 100%; padding: 12px; background: #2099da; color: white; font-weight: bold; cursor: pointer;
+      border-radius: 6px; font-size: 16px; transition: 0.3s; margin-bottom: 15px; border: none; }
+    button:hover { background: #186591; }
+    body.light button { background: #0077b6; color: #fff; }
+    .error { color: #ff4d4d; margin-bottom: 15px; font-weight: bold; display: none; }
+    .switch-container { display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .switch-label { font-size: 16px; font-weight: bold; }
+    body.light .switch-label { color: #111; }
+    .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #777;
+      transition: 0.4s; border-radius: 24px; }
+    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+      background-color: white; transition: 0.4s; border-radius: 50%; }
+    input:checked + .slider { background-color: #2196F3; }
+    input:checked + .slider:before { transform: translateX(26px); }
+    .toggle-link { color: #2099da; font-weight: bold; cursor: pointer; display: block; margin-top: 10px;
+      transition: color 0.3s ease; }
+    .toggle-link:hover { color: #0d6efd; text-decoration: underline; }
+    body.light .toggle-link { color: #0077b6; }
+    .footer-text { margin-top: 12px; font-size: 13px; color: #aaa; font-style: italic; }
+    body.light .footer-text { color: #555; }
+    strong{
+      color: #ffcc66;
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-wrapper">
+    <div class="switch-container">
+      <span class="switch-label">Light Mode</span>
+      <label class="switch">
+        <input type="checkbox" id="modeSwitch">
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="auth-container">
+      <h1 id="formTitle">ELDAH LOGIN</h1>
+      <div class="error" id="errorMsg"></div>
+
+      <div id="authForm">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter your email">
+
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password">
+
+        <button id="authBtn">Login</button>
+      </div>
+
+      <span class="toggle-link" id="toggleForm">Don’t have an account? <strong>Create one now</strong></span>
+      <div class="footer-text">🔒 Secure access provided by ELDAH Authentication</div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBRUNooWcKCq8YfUM1tZw1HMRrmWopcM2A",
+      authDomain: "eldah-network-unlock.firebaseapp.com",
+      projectId: "eldah-network-unlock",
+      storageBucket: "eldah-network-unlock.appspot.com",
+      messagingSenderId: "612531514748",
+      appId: "1:612531514748:web:3d67cb3386940dc2e708f9"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const modeSwitch = document.getElementById('modeSwitch');
+    modeSwitch.checked = false;
+    modeSwitch.addEventListener('change', () => {
+      document.body.classList.toggle('light', modeSwitch.checked);
+    });
+
+    let isRegister = false;
+    const formTitle = document.getElementById('formTitle');
+    const authBtn = document.getElementById('authBtn');
+    const toggleForm = document.getElementById('toggleForm');
+    const errorMsg = document.getElementById('errorMsg');
+
+    toggleForm.addEventListener('click', () => {
+      isRegister = !isRegister;
+      formTitle.textContent = isRegister ? "ELDAH REGISTER" : "ELDAH LOGIN";
+      authBtn.textContent = isRegister ? "Register" : "Login";
+      toggleForm.innerHTML = isRegister 
+        ? "Already have an account? <strong>Sign in here</strong>"
+        : "Don’t have an account? <strong>Create one now</strong>";
+      errorMsg.style.display = 'none';
+    });
+
+    authBtn.addEventListener('click', async () => {
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      errorMsg.style.display = 'none';
+
+      if (!email || !password) {
+        errorMsg.textContent = '⚠ Please fill in all fields';
+        errorMsg.style.display = 'block';
+        return;
+      }
+
+      try {
+        if (isRegister) {
+          const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+          const user = userCredential.user;
+
+          // Create Firestore document for credits
+          await setDoc(doc(db, "users", user.uid), {
+            email: user.email,
+            credits: 2, // starting credits
+            createdAt: new Date().toISOString()
+          });
+
+          window.location.href = 'unlock.html';
+        } else {
+          await signInWithEmailAndPassword(auth, email, password);
+          window.location.href = 'unlock.html';
+        }
+      } catch (error) {
+        errorMsg.textContent = "❌ " + error.message;
+        errorMsg.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

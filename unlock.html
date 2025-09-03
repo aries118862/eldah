@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ELDAH UNLOCK V2.4</title>
+ <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #1c1c1c;
+      color: #f1f1f1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      transition: all 0.3s ease;
+    }
+    body.light {
+      background: #f4f4f4;
+      color: #111;
+    }
+
+    .wrapper {
+      width: 420px;
+    }
+
+    .switch-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .switch-label {
+      font-size: 16px;
+      font-weight: bold;
+    }
+    body.light .switch-label {
+      color: #111;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #777;
+      transition: 0.4s;
+      border-radius: 24px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .container {
+      background: #2a2a2a;
+      padding: 30px;
+      border-radius: 12px;
+      border: 2px solid rgba(32, 153, 218, 0.6);
+      transition: all 0.3s ease;
+    }
+    body.light .container {
+      background: #fff;
+      border-color: #2099da;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #2099da;
+      text-align: center;
+    }
+    body.light h1 { color: #0077b6; }
+
+    .user-info {
+      margin-bottom: 20px;
+      padding: 10px;
+      font-weight: bold;
+      color: #2099da;
+      border: 1px dashed #2099da;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 18px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      border-bottom: 2px solid #2099da;
+      background: #3a3a3a;
+      color: #fff;
+      transition: all 0.3s ease;
+    }
+    body.light select, 
+    body.light input[type="text"] {
+      background: #eaeaea;
+      color: #111;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #2099da;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 16px;
+      transition: 0.3s;
+      margin-bottom: 20px;
+      border: none;
+    }
+    button:hover { background: #186591; }
+    body.light button { background: #0077b6; }
+
+    .log-screen {
+      background: #111;
+      color: #0f0;
+      padding: 15px;
+      height: 180px;
+      overflow-y: auto;
+      font-size: 14px;
+      border-radius: 8px;
+      border: 1px solid #2099da;
+      margin-bottom: 12px;
+      white-space: pre-line;
+    }
+    body.light .log-screen { background: #eaeaea; color: #064; }
+
+    .code-box {
+      font-size: 22px;
+      font-weight: bold;
+      color: #00ffcc;
+      text-align: center;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #00ffcc;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="switch-container">
+      <span class="switch-label">Light Mode</span>
+      <label class="switch">
+        <input type="checkbox" id="modeSwitch">
+        <span class="slider"></span>
+      </label>
+    </div>
+    
+    <div class="container">
+      <h1>ELDAH NETWORK UNLOCK V2.4</h1>
+      <div class="user-info" id="userInfo">Loading user...</div>
+
+      <label for="model">Select Phone Model:</label>
+      <select id="model">
+        <option>Hisense</option>
+        <option>Tecno</option>
+        <option>Itel</option>
+        <option>Stylo</option>
+        <option>Premio</option>
+        <option>Sechocha</option>
+        <option>MTN</option>
+        <option>Hurricane</option>
+        <option>Econet Prime</option>
+        <option>Vodafone</option>
+        <option>Other brand</option>
+      </select>
+      
+      <label for="imei">Enter IMEI Number:</label>
+      <input type="text" id="imei" placeholder="Enter 15-digit IMEI" maxlength="15">
+      
+      <button id="unlockBtn">Generate Unlock Code</button>
+
+      <div class="log-screen" id="log">Welcome to ELDAH UNLOCK V2.4
+Ready to generate unlock code...</div>
+      <div class="code-box" id="code"></div>
+    </div>
+  </div>
+
+  <script type="module">
+    // --- Firebase Imports ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.1.0/firebase-firestore.js";
+
+    // --- Your Firebase Config ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBRUNooWcKCq8YfUM1tZw1HMRrmWopcM2A",
+      authDomain: "eldah-network-unlock.firebaseapp.com",
+      projectId: "eldah-network-unlock",
+      storageBucket: "eldah-network-unlock.appspot.com",
+      messagingSenderId: "612531514748",
+      appId: "1:612531514748:web:3d67cb3386940dc2e708f9"
+    };
+
+    // --- Init Firebase ---
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // --- DOM Elements ---
+    const userInfoEl = document.getElementById('userInfo');
+    const logEl = document.getElementById('log');
+    const codeBox = document.getElementById('code');
+    const imeiInput = document.getElementById('imei');
+    const unlockBtn = document.getElementById('unlockBtn');
+    const modeSwitch = document.getElementById('modeSwitch');
+
+    let credits = 0;
+
+    // --- Mode Toggle ---
+    modeSwitch.addEventListener('change', () => {
+      document.body.classList.toggle('light');
+    });
+
+    // --- Logger ---
+    function logMessage(msg, delay = 0) {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          logEl.innerHTML += msg + '\n';
+          logEl.scrollTop = logEl.scrollHeight;
+          resolve();
+        }, delay);
+      });
+    }
+
+    function showError(error) {
+      logEl.innerHTML += "❌ Error: " + error + "\n";
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function updateUserInfo(email, credits) {
+      userInfoEl.textContent = `Email: ${email} | Credits: ${credits}`;
+    }
+
+    function generateCode(imei) {
+      if (!/^\d{15}$/.test(imei)) return null;
+      let code = '';
+      for (let i = 0; i < 14; i += 2) {
+        let sum = parseInt(imei[i]) + parseInt(imei[i + 1]);
+        if (sum >= 10) sum -= 9;
+        code += sum;
+      }
+      code += imei[14];
+      return code.slice(0, 8);
+    }
+
+    // --- Unlock Function ---
+    async function unlock() {
+      const imei = imeiInput.value.trim();
+      const model = document.getElementById('model').value;
+
+      logEl.innerHTML = '';
+      codeBox.innerHTML = '';
+
+      try {
+        if (credits <= 0) throw new Error("No credits remaining!");
+        if (!/^\d{15}$/.test(imei)) throw new Error("Invalid IMEI! Must be 15 digits.");
+        if (!model) throw new Error("Please select a phone model.");
+
+        // Deduct credit
+        const user = auth.currentUser;
+        if (!user) throw new Error("No user logged in!");
+
+        credits--;
+        await updateDoc(doc(db, "users", user.uid), { credits });
+        updateUserInfo(user.email, credits);
+
+        // Fake log process
+        await logMessage(`Starting unlock process for ${model}...`);
+        await logMessage("Verifying IMEI format... OK", 600);
+        await logMessage("Connecting to server... OK", 800);
+        await logMessage("Validating IMEI with manufacturer... OK", 1000);
+        await logMessage("Generating unlock code...", 700);
+
+        const unlockCode = generateCode(imei);
+        if (!unlockCode) throw new Error("Failed to generate unlock code.");
+
+        codeBox.innerHTML = `Unlock Code: ${unlockCode}`;
+        await logMessage(`Unlock code for IMEI ${imei}: ${unlockCode}`);
+      } catch (err) {
+        showError(err.message);
+      }
+    }
+
+    unlockBtn.addEventListener('click', unlock);
+
+    // --- Load User + Credits from Firestore ---
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        userInfoEl.textContent = "No user logged in!";
+        return;
+      }
+      try {
+        const snap = await getDoc(doc(db, "users", user.uid));
+        if (snap.exists()) {
+          credits = snap.data().credits ?? 0;
+          updateUserInfo(user.email, credits);
+        } else {
+          userInfoEl.textContent = "No Firestore data found!";
+        }
+      } catch (err) {
+        showError(err.message);
+      }
+    });
+  </script>
+</body>
+</html>
