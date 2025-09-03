@@ -298,7 +298,7 @@ import { getFirestore, doc, getDoc, setDoc, updateDoc }
   code += imei[0];
 
   // Ensure 8 digits (in case a sum is 2 digits, trim to length 8)
-  return code.slice(0, 8);
+  return code;
 }
 
 // --- Unlock Function ---
