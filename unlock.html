@@ -281,18 +281,25 @@ Ready to generate unlock code...</div>
     function updateUserInfo(email, credits) {
       userInfoEl.textContent = `Email: ${email} | Credits: ${credits}`;
     }
+  
+  function generateCode(imei) {
+  if (!/^\d{15}$/.test(imei)) return null;
+  let code = '';
 
-    function generateCode(imei) {
-      if (!/^\d{15}$/.test(imei)) return null;
-      let code = '';
-      for (let i = 0; i < 14; i += 2) {
-        let sum = parseInt(imei[i]) + parseInt(imei[i + 1]);
-        if (sum >= 10) sum -= 9;
-        code += sum;
-      }
-      code += imei[14];
-      return code.slice(0, 8);
-    }
+  // Loop through 7 pairs (14 digits)
+  for (let i = 0; i < 14; i += 2) {
+    let sum = parseInt(imei[i]) + parseInt(imei[i + 1]);
+    if (sum > 10) sum -= 10;  
+    code += sum;
+  }
+
+  // 8th digit = first digit of IMEI
+  code += imei[0];
+
+  // Ensure 8 digits (in case a sum is 2 digits, trim to length 8)
+  return code.slice(0, 8);
+}
+
 
     // --- Unlock Function ---
     async function unlock() {
