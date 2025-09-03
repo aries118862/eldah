@@ -346,22 +346,13 @@ async function unlock() {
     if (!unlockCode) throw new Error("Failed to generate unlock code.");
 
     // Save new IMEI + code in Firestore
-    await updateDoc(doc(db, "imeis", imei), {
-      imei,
-      model,
-      code: unlockCode,
-      createdAt: new Date(),
-      createdBy: user.uid
-    }).catch(async () => {
-      // If document doesn't exist → create
-      await setDoc(doc(db, "imeis", imei), {
-        imei,
-        model,
-        code: unlockCode,
-        createdAt: new Date(),
-        createdBy: user.uid
-      });
-    });
+    await setDoc(doc(db, "imeis", imei), {
+  imei,
+  model,
+  code: unlockCode,
+  createdAt: new Date(),
+  createdBy: user.uid
+}, { merge: true });
 
     codeBox.innerHTML = `Unlock Code: ${unlockCode}`;
     await logMessage(`Unlock code for IMEI ${imei}: ${unlockCode}`);
