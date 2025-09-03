@@ -300,44 +300,74 @@ Ready to generate unlock code...</div>
   return code.slice(0, 8);
 }
 
+// --- Unlock Function ---
+async function unlock() {
+  const imei = imeiInput.value.trim();
+  const model = document.getElementById('model').value;
 
-    // --- Unlock Function ---
-    async function unlock() {
-      const imei = imeiInput.value.trim();
-      const model = document.getElementById('model').value;
+  logEl.innerHTML = '';
+  codeBox.innerHTML = '';
 
-      logEl.innerHTML = '';
-      codeBox.innerHTML = '';
+  try {
+    if (!/^\d{15}$/.test(imei)) throw new Error("Invalid IMEI! Must be 15 digits.");
+    if (!model) throw new Error("Please select a phone model.");
 
-      try {
-        if (credits <= 0) throw new Error("No credits remaining!");
-        if (!/^\d{15}$/.test(imei)) throw new Error("Invalid IMEI! Must be 15 digits.");
-        if (!model) throw new Error("Please select a phone model.");
+    const user = auth.currentUser;
+    if (!user) throw new Error("No user logged in!");
 
-        // Deduct credit
-        const user = auth.currentUser;
-        if (!user) throw new Error("No user logged in!");
+    // 1️⃣ Check if IMEI already exists in Firestore
+    const imeiRef = doc(db, "imeis", imei);
+    const imeiSnap = await getDoc(imeiRef);
 
-        credits--;
-        await updateDoc(doc(db, "users", user.uid), { credits });
-        updateUserInfo(user.email, credits);
-
-        // Fake log process
-        await logMessage(`Starting unlock process for ${model}...`);
-        await logMessage("Verifying IMEI format... OK", 600);
-        await logMessage("Connecting to server... OK", 800);
-        await logMessage("Validating IMEI with manufacturer... OK", 1000);
-        await logMessage("Generating unlock code...done", 700);
-
-        const unlockCode = generateCode(imei);
-        if (!unlockCode) throw new Error("Failed to generate unlock code.");
-
-        codeBox.innerHTML = `Unlock Code: ${unlockCode}`;
-        await logMessage(`Unlock code for IMEI ${imei}: ${unlockCode}`);
-      } catch (err) {
-        showError(err.message);
-      }
+    if (imeiSnap.exists()) {
+      // IMEI already unlocked → retrieve code
+      const savedCode = imeiSnap.data().code;
+      await logMessage(`IMEI found in database. Retrieving unlock code...`, 600);
+      codeBox.innerHTML = `Unlock Code: ${savedCode}`;
+      await logMessage(`Unlock code for IMEI ${imei}: ${savedCode}`);
+      return; // ✅ Exit without deducting credits
     }
+
+    // 2️⃣ IMEI not found → generate new unlock code
+    if (credits <= 0) throw new Error("No credits remaining!");
+
+    credits--;
+    await updateDoc(doc(db, "users", user.uid), { credits });
+    updateUserInfo(user.email, credits);
+
+    await logMessage(`Starting unlock process for ${model}...`);
+    await logMessage("Validating IMEI format... Success", 600);
+    await logMessage("Connecting to server... Established", 800);
+    await logMessage("Checking with manufacturer database... Verified", 1000);
+    await logMessage("Generating unlock code... Please wait", 700);
+
+    const unlockCode = generateCode(imei);
+    if (!unlockCode) throw new Error("Failed to generate unlock code.");
+
+    // Save new IMEI + code in Firestore
+    await updateDoc(doc(db, "imeis", imei), {
+      imei,
+      model,
+      code: unlockCode,
+      createdAt: new Date(),
+      createdBy: user.uid
+    }).catch(async () => {
+      // If document doesn't exist → create
+      await setDoc(doc(db, "imeis", imei), {
+        imei,
+        model,
+        code: unlockCode,
+        createdAt: new Date(),
+        createdBy: user.uid
+      });
+    });
+
+    codeBox.innerHTML = `Unlock Code: ${unlockCode}`;
+    await logMessage(`Unlock code for IMEI ${imei}: ${unlockCode}`);
+  } catch (err) {
+    showError(err.message);
+  }
+}
 
     unlockBtn.addEventListener('click', unlock);
 
