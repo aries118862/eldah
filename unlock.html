@@ -290,7 +290,7 @@ import { getFirestore, doc, getDoc, setDoc, updateDoc }
   // Loop through 7 pairs kabza (14 digits)
   for (let i = 0; i < 14; i += 2) {
     let sum = parseInt(imei[i]) + parseInt(imei[i + 1]);
-    if (sum > 10) sum -= 10;  
+    if (sum >= 10) sum -= 10;  
     code += sum;
   }
 
