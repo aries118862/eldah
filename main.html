@@ -151,7 +151,7 @@
           // Create Firestore document for credits
           await setDoc(doc(db, "users", user.uid), {
             email: user.email,
-            credits: 2, // starting credits
+            credits: 0, // starting credits
             createdAt: new Date().toISOString()
           });
 
